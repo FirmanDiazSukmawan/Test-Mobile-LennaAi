@@ -1,25 +1,33 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import BubbleProfileAi from './BubbleProfileAi';
-import {TypeMessage} from '../../type/type';
+import {ChatItem} from '../../type/type';
+import ContentSingle from './ContentSingle';
+import ContentMulti from './ContentMulti';
 
-type dataMessage = {
-  data: TypeMessage;
-};
-
-const Message = ({data}: dataMessage) => {
+const Message = ({sender, chat, type}: ChatItem) => {
   return (
     <View style={[styles.messageContainer]}>
-      {data?.from === 'ai' ? (
+      {sender === 'bot' ? (
         <View style={styles.sectionMessageAi}>
           <BubbleProfileAi />
           <View style={styles.aiMessage}>
-            <Text style={styles.messageText}>{data.text}</Text>
+            {type === 'single' ? (
+              <ContentSingle chat={chat} />
+            ) : (
+              <ContentMulti chat={chat} />
+            )}
           </View>
         </View>
       ) : (
-        <View style={styles.userMessage}>
-          <Text style={styles.messageText}>{data.text}</Text>
+        <View style={styles.sectionUser}>
+          <View style={styles.userMessage}>
+            {chat?.map((item, index) => (
+              <Text key={index} style={styles.messageText}>
+                {item?.text}
+              </Text>
+            ))}
+          </View>
         </View>
       )}
     </View>
@@ -37,12 +45,9 @@ const styles = StyleSheet.create({
   },
   aiMessage: {
     alignSelf: 'flex-start',
-    backgroundColor: '#B4B4B4',
-    borderTopLeftRadius: 0,
-    padding: 10,
-    borderRadius: 12,
-    maxWidth: '80%',
+    maxWidth: '100%',
   },
+  sectionUser: {paddingRight: '5%'},
   userMessage: {
     alignSelf: 'flex-end',
     backgroundColor: '#B4B4B4',
@@ -50,6 +55,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 12,
     maxWidth: '80%',
+    // marginTop: 15,
   },
   messageText: {
     fontSize: 12,

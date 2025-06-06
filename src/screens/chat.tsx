@@ -4,95 +4,131 @@ import {
   Platform,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import React, {useState} from 'react';
 import BubbleProfileAi from '../component/ui/BubbleProfileAi';
 import Message from '../component/ui/Message';
-import {TypeMessage} from '../type/type';
 import Input from '../component/form/input';
+import {useDispatch, useSelector} from 'react-redux';
+import {addChat, clearChat, selectChat} from '../redux/reducer/chat';
+import {getFAQAnswer} from '../component/function/filterReplyAi';
 
-const messages: TypeMessage[] = [
-  {from: 'user', text: 'Apa itu Lenna.ai?'},
+const dummyFAQ = [
   {
-    from: 'ai',
-    text: 'Lenna.ai adalah perusahaan teknologi AI asal Indonesia yang menyediakan platform chatbot dan asisten virtual untuk membantu bisnis meningkatkan layanan pelanggan secara otomatis dan efisien.',
+    id: 1,
+    title: 'Apa itu Lena.Ai',
   },
-  {from: 'user', text: 'Apa saja Product Lenna Ai'},
   {
-    from: 'ai',
-    text: 'Triple box or gambar',
+    id: 2,
+    title: 'Apa saja product Lenna.ai',
   },
-  {from: 'user', text: 'Apa saja Product Lenna Ai'},
   {
-    from: 'ai',
-    text: 'Triple box or gambar',
+    id: 3,
+    title: 'Client Lena.ai',
   },
-  {from: 'user', text: 'Apa saja Product Lenna Ai'},
   {
-    from: 'ai',
-    text: 'Triple box or gambar',
-  },
-  {from: 'user', text: 'Apa saja Product Lenna Ai'},
-  {
-    from: 'ai',
-    text: 'Triple box or gambar',
+    id: 4,
+    title: 'Apa itu Lena.Ai',
   },
 ];
 
 const Chat = () => {
-  const [search, setSearch] = useState('');
+  const [text, setText] = useState('');
+  const dispatch = useDispatch();
+  const dataChat = useSelector(selectChat);
 
-  const handleSearch = () => {
-    console.log('halo');
+  const handleSubmit = async () => {
+    if (!text.trim()) return;
+
+    await dispatch(
+      addChat({
+        sender: 'user',
+        recipient: 'bot',
+        chat: [
+          {
+            image: '',
+            text: text,
+          },
+        ],
+        type: 'single',
+      }),
+    );
+
+    const answer = await getFAQAnswer(text);
+    await dispatch(addChat(answer));
+    setText('');
+    Keyboard.dismiss();
   };
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 10 : 0}>
-      <View style={{flex: 1}}>
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={50}
+      style={{flex: 1}}>
+      <View style={styles.container}>
         <FlatList
-          data={messages}
+          data={dataChat}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({item}) => <Message data={item} />}
-          contentContainerStyle={{gap: 15, paddingBottom: 50}}
+          renderItem={({item}) => (
+            <Message
+              recipient={item?.recipient}
+              sender={item?.sender}
+              chat={item?.chat}
+              type={item?.type}
+            />
+          )}
+          // keyboardDismissMode="interactive"
+          // automaticallyAdjustContentInsets={false}
+          // contentInsetAdjustmentBehavior="never"
+          // automaticallyAdjustKeyboardInsets={true}
+          ItemSeparatorComponent={() => <View style={{height: 15}} />}
+          contentContainerStyle={styles.containerFlatList}
+          // keyboardShouldPersistTaps="handled"
           ListHeaderComponent={
             <View style={styles.sectionFirstShowAiMessage}>
               <BubbleProfileAi />
               <View style={styles.aiMessage}>
-                <Text style={styles.messageText}>
+                <Text style={styles.messageTextTittle}>
                   Ask what you want to Know
                 </Text>
                 <View style={styles.sectionBox}>
-                  <Text style={styles.messageText}>halo</Text>
+                  {dummyFAQ?.map((item, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => dispatch(clearChat())}>
+                      <Text style={styles.messageText}>{item?.title}</Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
               </View>
             </View>
           }
         />
-      </View>
-      <View style={styles.inputWrapper}>
-        <Input
-          name="search"
-          type="text"
-          placeholder={'Search Product ...'}
-          placeholderTextColor="black"
-          value={search}
-          onChange={(text: any) => setSearch(text)}
-          style={styles.input}
-          sectionStyle={styles.sectionSearch}
-          error_messages={[]}
-          addOn={{
-            iconName: 'search',
-            iconSize: 20,
-            iconColor: 'blue',
-            style: styles.iconInput,
-            onClick: () => handleSearch(),
-          }}
-          onSubmitEditing={() => handleSearch()}
-        />
+
+        <View style={styles.inputWrapper}>
+          <Input
+            name="search"
+            type="text"
+            placeholder={'Tanya apa saja ...'}
+            placeholderTextColor="black"
+            value={text}
+            onChange={(val: string) => setText(val)}
+            style={styles.input}
+            error_messages={[]}
+            addOn={{
+              iconName: 'search',
+              iconSize: 20,
+              iconColor: 'blue',
+              style: styles.iconInput,
+              onClick: () => handleSubmit(),
+            }}
+            onSubmitEditing={() => handleSubmit()}
+          />
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -102,50 +138,58 @@ export default Chat;
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: '5%',
-    paddingTop: 10,
     flex: 1,
-    gap: 15,
-    position: 'relative',
+    backgroundColor: 'white',
+    paddingLeft: '5%',
   },
   sectionFirstShowAiMessage: {
     gap: 5,
+    marginBottom: 10,
+  },
+  containerFlatList: {
+    paddingVertical: 20,
   },
   aiMessage: {
     alignSelf: 'flex-start',
     backgroundColor: '#B4B4B4',
-    borderTopLeftRadius: 0,
-    padding: 10,
     borderRadius: 12,
     maxWidth: '80%',
+    marginBottom: 15,
   },
   messageText: {
     fontSize: 12,
     color: 'black',
     fontFamily: 'inter',
     fontWeight: '400',
+    borderBottomWidth: 1,
+    paddingVertical: 9,
   },
-  sectionBox: {backgroundColor: 'white'},
+  messageTextTittle: {
+    fontSize: 12,
+    color: 'black',
+    fontFamily: 'inter',
+    fontWeight: '400',
+    padding: 10,
+  },
+  sectionBox: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+  },
   inputWrapper: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    alignSelf: 'center',
-  },
-  sectionSearch: {
-    flex: 1,
+    paddingVertical: 10,
+    paddingRight: '5%',
   },
   input: {
-    backgroundColor: 'white',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    position: 'relative',
+    backgroundColor: '#D6D6D6',
+    height: 54,
+    borderRadius: 12,
     color: 'black',
+    paddingHorizontal: 15,
   },
   iconInput: {
     position: 'absolute',
     right: 15,
-    top: '26%',
+    top: '30%',
   },
 });

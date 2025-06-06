@@ -92,14 +92,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   input: {
-    borderRadius: 5,
-    borderWidth: 1,
     color: 'black',
     width: '100%',
-    height: 41.33,
-    paddingHorizontal: 8,
-    paddingVertical: 12,
-    fontSize: 13,
+    fontSize: 12,
   },
   normalInput: {
     borderColor: '#e5e7eb',
