@@ -8,7 +8,6 @@ type dataMessage = {
 };
 
 const Message = ({data}: dataMessage) => {
-  console.log(data);
   return (
     <View style={[styles.messageContainer]}>
       {data?.from === 'ai' ? (

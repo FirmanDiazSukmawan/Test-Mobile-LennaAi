@@ -12,9 +12,9 @@ function App(): React.JSX.Element {
     <SafeAreaProvider>
       <NavigationContainer>
         <SafeAreaView edges={['top']} style={styles.topSafeArea} />
-        <View style={styles.content}>
+        <SafeAreaView edges={['bottom']} style={styles.content}>
           <MainRouter />
-        </View>
+        </SafeAreaView>
       </NavigationContainer>
     </SafeAreaProvider>
   );
