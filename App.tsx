@@ -1,24 +1,34 @@
 import {NavigationContainer} from '@react-navigation/native';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {StyleSheet} from 'react-native';
 import {enableScreens} from 'react-native-screens';
 import MainRouter from './src/route/MainRouter';
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import {Provider} from 'react-redux';
-import {store} from './src/redux/store';
+import {persistor, store} from './src/redux/store';
+import {PersistGate} from 'redux-persist/integration/react';
+import BootSplash from 'react-native-bootsplash';
 
 enableScreens();
 
 function App(): React.JSX.Element {
+  useEffect(() => {
+    setTimeout(async () => {
+      await BootSplash.hide();
+    }, 1000);
+  }, []);
+
   return (
     <SafeAreaProvider>
       <Provider store={store}>
-        <NavigationContainer>
-          <SafeAreaView edges={['top']} style={styles.topSafeArea} />
-          <SafeAreaView edges={['bottom']} style={styles.content}>
-            <MainRouter />
-          </SafeAreaView>
-        </NavigationContainer>
+        <PersistGate loading={null} persistor={persistor}>
+          <NavigationContainer>
+            <SafeAreaView edges={['top']} style={styles.topSafeArea} />
+            <SafeAreaView edges={['bottom']} style={styles.content}>
+              <MainRouter />
+            </SafeAreaView>
+          </NavigationContainer>
+        </PersistGate>
       </Provider>
     </SafeAreaProvider>
   );

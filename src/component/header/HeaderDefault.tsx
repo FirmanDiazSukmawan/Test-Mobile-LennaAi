@@ -2,9 +2,7 @@ import {Image, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import image from '../../assets/lenna-logo-white.png';
 
-type Props = {};
-
-const HeaderDefault = (props: Props) => {
+const HeaderDefault = () => {
   return (
     <View style={styles.section}>
       <View style={styles.leftLogo}>
@@ -21,7 +19,7 @@ const styles = StyleSheet.create({
   section: {
     backgroundColor: '#3A6CBE',
     paddingBottom: 27.5,
-    paddingTop: 10,
+    paddingTop: 27.5,
     paddingHorizontal: '5%',
     alignItems: 'center',
     flexDirection: 'row',
@@ -32,7 +30,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     left: '5%',
     position: 'absolute',
-    top: 10,
+    top: 27.5,
   },
   logo: {
     width: 25,

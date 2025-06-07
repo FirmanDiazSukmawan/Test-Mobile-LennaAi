@@ -4,20 +4,25 @@ import BubbleProfileAi from './BubbleProfileAi';
 import {ChatItem} from '../../type/type';
 import ContentSingle from './ContentSingle';
 import ContentMulti from './ContentMulti';
+import LoadingDot from '../loading/LoadingDot';
 
-const Message = ({sender, chat, type}: ChatItem) => {
+const Message = ({sender, chat, type, loading, latestIndex}: ChatItem) => {
   return (
     <View style={[styles.messageContainer]}>
       {sender === 'bot' ? (
         <View style={styles.sectionMessageAi}>
           <BubbleProfileAi />
-          <View style={styles.aiMessage}>
-            {type === 'single' ? (
-              <ContentSingle chat={chat} />
-            ) : (
-              <ContentMulti chat={chat} />
-            )}
-          </View>
+          {loading && latestIndex ? (
+            <LoadingDot dotColor="#FF5733" dotSize={36} />
+          ) : (
+            <View style={styles.aiMessage}>
+              {type === 'single' ? (
+                <ContentSingle chat={chat} />
+              ) : (
+                <ContentMulti chat={chat} />
+              )}
+            </View>
+          )}
         </View>
       ) : (
         <View style={styles.sectionUser}>

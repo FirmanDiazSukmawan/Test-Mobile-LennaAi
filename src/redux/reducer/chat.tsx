@@ -1,15 +1,17 @@
-import {createSlice} from '@reduxjs/toolkit';
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../store';
 import {ChatItem} from '../../type/type';
 
 interface ChatState {
   chat: ChatItem[];
   activeChat: ChatItem | null;
+  loading: boolean;
 }
 
 const initialState: ChatState = {
   chat: [],
   activeChat: null,
+  loading: false,
 };
 
 const chatSlice = createSlice({
@@ -26,9 +28,15 @@ const chatSlice = createSlice({
       state.chat = [];
       state.activeChat = null;
     },
+    setLoading(state, action: PayloadAction<boolean>) {
+      state.loading = action.payload;
+    },
   },
 });
 
-export const {addChat, setActiveChat, clearChat} = chatSlice.actions;
+export const {addChat, setActiveChat, clearChat, setLoading} =
+  chatSlice.actions;
 export const selectChat = (state: RootState) => state.chat.chat;
+export const selectLoading = (state: RootState) => state.chat.loading;
+
 export default chatSlice.reducer;

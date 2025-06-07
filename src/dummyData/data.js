@@ -1,9 +1,12 @@
+import image1 from '../assets/image1.png';
+import image2 from '../assets/image2.png';
+
 export const dummyData = {
   about: {
     answer: [
       {
         text: 'Lenna.ai adalah perusahaan teknologi AI asal Indonesia yang menyediakan platform chatbot dan asisten virtual untuk membantu bisnis meningkatkan layanan pelanggan secara otomatis dan efisien.',
-        image: '',
+        image: image2,
       },
     ],
   },
@@ -12,17 +15,17 @@ export const dummyData = {
       {
         title: 'Lenna Virtual Assistant',
         text: 'Asisten virtual berbasis AI yang dapat menangani pertanyaan pelanggan secara otomatis 24/7.',
-        image: '',
+        image: image2,
       },
       {
         title: 'Lenna Chatbot Platform',
         text: 'Platform pembuatan chatbot untuk berbagai kanal seperti WhatsApp, Telegram, dan situs web.',
-        image: '',
+        image: image1,
       },
       {
         title: 'Lenna Voicebot',
         text: 'Voicebot cerdas yang dapat digunakan untuk customer service berbasis percakapan suara.',
-        image: '',
+        image: image2,
       },
     ],
   },
@@ -38,7 +41,7 @@ export const dummyData = {
         - Percakapan Harian: Lenna menangani lebih dari 10 juta percakapan setiap hari di berbagai sektor, menunjukkan kapasitas yang besar dalam menyuplai kebutuhan pelayanan pelanggan.
 
         Klien Lenna terdiri dari berbagai sektor, mulai dari retail, bank, layanan pelanggan, hingga e-commerce. Jika Anda ingin informasi lebih lanjut mengenai klien spesifik atau kasuistik yang ada, silakan tanya! 😊`,
-        image: '',
+        image: image2,
       },
     ],
   },

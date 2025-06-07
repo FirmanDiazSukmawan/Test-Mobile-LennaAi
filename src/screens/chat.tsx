@@ -3,19 +3,24 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
   Keyboard,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
 } from 'react-native';
-import React, {useState} from 'react';
-import BubbleProfileAi from '../component/ui/BubbleProfileAi';
+import React, {useEffect, useState} from 'react';
 import Message from '../component/ui/Message';
 import Input from '../component/form/input';
 import {useDispatch, useSelector} from 'react-redux';
-import {addChat, clearChat, selectChat} from '../redux/reducer/chat';
+import {
+  addChat,
+  clearChat,
+  selectChat,
+  selectLoading,
+  setLoading,
+} from '../redux/reducer/chat';
 import {getFAQAnswer} from '../component/function/filterReplyAi';
+import HeaderFlatListFaq from '../component/header/HeaderFlatListFaq';
+import {Text} from 'react-native-gesture-handler';
 
 const dummyFAQ = [
   {
@@ -36,13 +41,25 @@ const dummyFAQ = [
   },
 ];
 
+const ItemSeparator = () => <View style={styles.gapFlatList} />;
+
 const Chat = () => {
   const [text, setText] = useState('');
   const dispatch = useDispatch();
   const dataChat = useSelector(selectChat);
+  const loading = useSelector(selectLoading);
+  const [keyboardOffset, setKeyboardOffset] = useState(
+    Platform.OS === 'ios' ? 90 : 0,
+  );
 
-  const handleSubmit = async () => {
-    if (!text.trim()) return;
+  const handleSubmitWithText = async (submitText?: string) => {
+    const messageText = submitText || text;
+
+    if (!messageText.trim()) {
+      return;
+    }
+
+    await dispatch(setLoading(true));
 
     await dispatch(
       addChat({
@@ -51,65 +68,91 @@ const Chat = () => {
         chat: [
           {
             image: '',
-            text: text,
+            text: messageText,
           },
         ],
         type: 'single',
       }),
     );
 
-    const answer = await getFAQAnswer(text);
+    const answer = await getFAQAnswer(messageText);
     await dispatch(addChat(answer));
     setText('');
     Keyboard.dismiss();
+
+    setTimeout(() => {
+      dispatch(setLoading(false));
+    }, 2000);
   };
+
+  const handleFAQPress = (faqText: string) => {
+    setText(faqText);
+    handleSubmitWithText(faqText);
+  };
+
+  const handleSubmit = async () => {
+    handleSubmitWithText();
+  };
+
+  useEffect(() => {
+    const onKeyboardShow = (e: any) => {
+      const height = e?.endCoordinates?.height ?? 0;
+
+      console.log('Keyboard height:', e?.endCoordinates?.height);
+
+      if (Platform.OS === 'android') {
+        setKeyboardOffset(height - 175);
+      } else {
+        setKeyboardOffset(90);
+      }
+    };
+
+    const onKeyboardHide = () => {
+      setKeyboardOffset(0);
+    };
+
+    const showSub = Keyboard.addListener('keyboardDidShow', onKeyboardShow);
+    const hideSub = Keyboard.addListener('keyboardDidHide', onKeyboardHide);
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={50}
+      keyboardVerticalOffset={keyboardOffset}
       style={{flex: 1}}>
       <View style={styles.container}>
         <FlatList
           data={dataChat}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({item}) => (
+          renderItem={({item, index}) => (
             <Message
               recipient={item?.recipient}
               sender={item?.sender}
               chat={item?.chat}
               type={item?.type}
+              loading={loading && index === dataChat?.length - 1}
+              latestIndex={index === dataChat?.length - 1}
             />
           )}
-          // keyboardDismissMode="interactive"
-          // automaticallyAdjustContentInsets={false}
-          // contentInsetAdjustmentBehavior="never"
-          // automaticallyAdjustKeyboardInsets={true}
-          ItemSeparatorComponent={() => <View style={{height: 15}} />}
+          ItemSeparatorComponent={ItemSeparator}
           contentContainerStyle={styles.containerFlatList}
-          // keyboardShouldPersistTaps="handled"
           ListHeaderComponent={
-            <View style={styles.sectionFirstShowAiMessage}>
-              <BubbleProfileAi />
-              <View style={styles.aiMessage}>
-                <Text style={styles.messageTextTittle}>
-                  Ask what you want to Know
-                </Text>
-                <View style={styles.sectionBox}>
-                  {dummyFAQ?.map((item, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      onPress={() => dispatch(clearChat())}>
-                      <Text style={styles.messageText}>{item?.title}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            </View>
+            <HeaderFlatListFaq
+              dummyFAQ={dummyFAQ}
+              onFAQPress={handleFAQPress}
+            />
           }
         />
 
         <View style={styles.inputWrapper}>
+          <TouchableOpacity onPress={() => dispatch(clearChat())}>
+            <Text style={styles.resetText}>Reset Chat</Text>
+          </TouchableOpacity>
           <Input
             name="search"
             type="text"
@@ -139,42 +182,12 @@ export default Chat;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#f6f6f6',
     paddingLeft: '5%',
   },
-  sectionFirstShowAiMessage: {
-    gap: 5,
-    marginBottom: 10,
-  },
+
   containerFlatList: {
     paddingVertical: 20,
-  },
-  aiMessage: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#B4B4B4',
-    borderRadius: 12,
-    maxWidth: '80%',
-    marginBottom: 15,
-  },
-  messageText: {
-    fontSize: 12,
-    color: 'black',
-    fontFamily: 'inter',
-    fontWeight: '400',
-    borderBottomWidth: 1,
-    paddingVertical: 9,
-  },
-  messageTextTittle: {
-    fontSize: 12,
-    color: 'black',
-    fontFamily: 'inter',
-    fontWeight: '400',
-    padding: 10,
-  },
-  sectionBox: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    paddingHorizontal: 10,
   },
   inputWrapper: {
     paddingVertical: 10,
@@ -190,6 +203,14 @@ const styles = StyleSheet.create({
   iconInput: {
     position: 'absolute',
     right: 15,
-    top: '30%',
+    top: 10,
+  },
+  gapFlatList: {height: 15},
+  resetText: {
+    color: '#3A6CBE',
+    fontWeight: '600',
+    textAlign: 'right',
+    marginBottom: 5,
+    marginRight: 5,
   },
 });

@@ -6,10 +6,12 @@ import {
   StyleProp,
   TextStyle,
   ViewStyle,
+  Image,
 } from 'react-native';
 import {TouchableOpacity} from 'react-native';
 import color from '../color/TextColor';
 import LabelForm from './label';
+import IconFigma from '../../assets/iconFigma.png';
 
 interface InputProps {
   name: string;
@@ -76,6 +78,12 @@ export default function Input(props: InputProps) {
       />
       {props.addOn && (
         <TouchableOpacity onPress={handleClickAddon} style={props.addOn.style}>
+          <Image
+            source={IconFigma}
+            width={35}
+            height={36}
+            resizeMode="contain"
+          />
           {/* <Ionicons
             name={props.addOn.iconName}
             size={props.addOn.iconSize}

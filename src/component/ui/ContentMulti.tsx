@@ -1,4 +1,4 @@
-import {ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import {chatArray} from '../../type/type';
 
@@ -11,7 +11,14 @@ const ContentMulti = ({chat}: {chat: chatArray[]}) => {
         contentContainerStyle={styles.containerSection}>
         {chat?.map((item, index) => (
           <View key={index} style={styles.card}>
-            <View style={styles.sectionMulti} />
+            <View style={styles.sectionMulti}>
+              <Image
+                source={item?.image}
+                alt="image"
+                resizeMode="cover"
+                style={styles.images}
+              />
+            </View>
             <Text
               style={styles.messageTitle}
               numberOfLines={2}
@@ -74,5 +81,11 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     height: 45,
     paddingHorizontal: 11,
+  },
+  images: {
+    width: null,
+    height: null,
+    flex: 1,
+    borderRadius: 12,
   },
 });
